@@ -1,0 +1,7 @@
+# One JSON object per line.
+# Required: prompt, images (1~4)
+# Optional: size, n (1~4), negative_prompt, seed, id
+
+{"id":"tomato_egg_1","prompt":"参考图1的风格和图2的背景，生成番茄炒蛋，高清，细节丰富","images":["https://cdn.wanx.aliyuncs.com/tmp/pressure/umbrella1.png","https://img.alicdn.com/imgextra/i3/O1CN01SfG4J41UYn9WNt4X1_!!6000000002530-49-tps-1696-960.webp"],"size":"1280*1280","n":1,"watermark":false}
+
+{"id":"style_transfer_1","prompt":"保持主体不变，把画面改成赛博朋克霓虹夜景风格，电影感光影","images":["https://example.com/your_input.jpg"],"size":"1280*720","n":1,"negative_prompt":"低质量, 模糊, 水印","seed":123}

@@ -1,0 +1,8 @@
+# Minimal deps for Gemini Flash image generation debug
+# Keep this file small to avoid pip resolver backtracking issues.
+
+google-genai>=0.6.0
+Pillow>=10.0.0
+python-dotenv>=1.0.0
+oss2>=2.18.0
+requests>=2.31.0

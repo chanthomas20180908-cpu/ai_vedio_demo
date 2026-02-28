@@ -1,0 +1,31 @@
+# Base dependencies for pythonProject
+# Goal: keep install fast and avoid pip resolver explosion.
+# Heavy/optional deps (gradio/pandas/selenium/playwright/opencv/moviepy/...) are moved to requirements.heavy.txt.
+
+# Core API clients
+openai>=1.0.0
+dashscope>=1.17.0
+
+# Gemini (Nano Banana / Flash image)
+google-genai>=0.6.0
+
+# Env / config
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# HTTP
+requests>=2.31.0
+httpx>=0.25.0
+
+# Parsing / scraping
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Images
+Pillow>=10.0.0
+
+# OSS upload
+oss2>=2.18.0
+
+# Small utilities
+charset-normalizer>=3.3.0

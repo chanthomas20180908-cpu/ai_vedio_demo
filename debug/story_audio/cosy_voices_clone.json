@@ -1,0 +1,84 @@
+{
+  "by_id": {
+    "cosyvoice-v3-plus-manstory1-3a01f745d8bd4a40a7e179529dff5e0a": {
+      "voice_id": "cosyvoice-v3-plus-manstory1-3a01f745d8bd4a40a7e179529dff5e0a",
+      "model": "cosyvoice-v3-plus",
+      "clone_prefix": "manstory1",
+      "clone_voice_name": "jianying_man_story_voice_001",
+      "ref_mp3": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/唐僧克苏鲁/大衮/大衮2/大衮2/大衮2.MP3",
+      "oss_url": "https://my-files-csy.oss-cn-hangzhou.aliyuncs.com/auto_uploads%2Fby_hash%2Fcac935483fefa24b9c493f8a55fcd87ffb08b8fd76781d0d8b9a30d70308dc76_%E5%A4%A7%E8%A1%AE2.MP3?OSSAccessKeyId=LTAI5t9pMQmrtoHAsxeQrXxV&Expires=1769848643&Signature=w3dJB8lawRiajhcl3adlj2LpDoM%3D",
+      "oss_meta": {
+        "sha256": "cac935483fefa24b9c493f8a55fcd87ffb08b8fd76781d0d8b9a30d70308dc76",
+        "object_name": "auto_uploads/by_hash/cac935483fefa24b9c493f8a55fcd87ffb08b8fd76781d0d8b9a30d70308dc76_大衮2.MP3",
+        "action": "reuse",
+        "local_file_path": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/唐僧克苏鲁/大衮/大衮2/大衮2/大衮2.MP3"
+      },
+      "clone_request_id": "c4e9814a-97d5-4317-962b-a452490d87f4",
+      "created_at": "20260131_153739"
+    },
+    "cosyvoice-v3-plus-gualiu001-7fe0e5fb00f342a68047488c69352eb8": {
+      "voice_id": "cosyvoice-v3-plus-gualiu001-7fe0e5fb00f342a68047488c69352eb8",
+      "model": "cosyvoice-v3-plus",
+      "clone_prefix": "gualiu001",
+      "clone_voice_name": "gualiu001",
+      "ref_mp3": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/JPM口播视频/葡萄架/三/1月22日 (3)(1).MP3",
+      "oss_url": "https://my-files-csy.oss-cn-hangzhou.aliyuncs.com/auto_uploads%2Fby_hash%2Fbe5489777cf79c2ebf4d183b5d4d2928d6c3fafd9b0f8bc2bc7c3f1a96369ff9_1%E6%9C%8822%E6%97%A5%20%283%29%281%29.MP3?OSSAccessKeyId=LTAI5t9pMQmrtoHAsxeQrXxV&Expires=1769849855&Signature=twde76MbauImWZ2KlJ4GPOJujYE%3D",
+      "oss_meta": {
+        "sha256": "be5489777cf79c2ebf4d183b5d4d2928d6c3fafd9b0f8bc2bc7c3f1a96369ff9",
+        "object_name": "auto_uploads/by_hash/be5489777cf79c2ebf4d183b5d4d2928d6c3fafd9b0f8bc2bc7c3f1a96369ff9_1月22日 (3)(1).MP3",
+        "action": "upload",
+        "local_file_path": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/JPM口播视频/葡萄架/三/1月22日 (3)(1).MP3"
+      },
+      "clone_request_id": "5ba7073c-27ba-442e-8b2c-c3540efe2858",
+      "created_at": "20260131_155750"
+    },
+    "cosyvoice-v3-flash-manflash01-7cc91b1194ed4a4a982d035734709b8b": {
+      "voice_id": "cosyvoice-v3-flash-manflash01-7cc91b1194ed4a4a982d035734709b8b",
+      "model": "cosyvoice-v3-flash",
+      "clone_prefix": "manflash01",
+      "clone_voice_name": "man_story_voice_flash_001",
+      "ref_mp3": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/唐僧克苏鲁/大衮/大衮2/大衮2/大衮2.MP3",
+      "oss_url": "https://my-files-csy.oss-cn-hangzhou.aliyuncs.com/auto_uploads%2Fby_hash%2Fcac935483fefa24b9c493f8a55fcd87ffb08b8fd76781d0d8b9a30d70308dc76_%E5%A4%A7%E8%A1%AE2.MP3?OSSAccessKeyId=LTAI5t9pMQmrtoHAsxeQrXxV&Expires=1769933811&Signature=T7Z36OD8hRgCwSqpXOdLB5GoR40%3D",
+      "oss_meta": {
+        "sha256": "cac935483fefa24b9c493f8a55fcd87ffb08b8fd76781d0d8b9a30d70308dc76",
+        "object_name": "auto_uploads/by_hash/cac935483fefa24b9c493f8a55fcd87ffb08b8fd76781d0d8b9a30d70308dc76_大衮2.MP3",
+        "action": "reuse",
+        "local_file_path": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/唐僧克苏鲁/大衮/大衮2/大衮2/大衮2.MP3"
+      },
+      "clone_request_id": "fdeee566-f780-489a-bc32-3a3f3204ffe7",
+      "created_at": "20260201_151707"
+    },
+    "cosyvoice-v3-flash-gualiu002-c0d8bae2fe1342e0a2df480501e75921": {
+      "voice_id": "cosyvoice-v3-flash-gualiu002-c0d8bae2fe1342e0a2df480501e75921",
+      "model": "cosyvoice-v3-flash",
+      "clone_prefix": "gualiu002",
+      "clone_voice_name": "gualiu_flash_001",
+      "ref_mp3": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/JPM口播视频/葡萄架/三/1月22日 (3)(1).MP3",
+      "oss_url": "https://my-files-csy.oss-cn-hangzhou.aliyuncs.com/auto_uploads%2Fby_hash%2Fbe5489777cf79c2ebf4d183b5d4d2928d6c3fafd9b0f8bc2bc7c3f1a96369ff9_1%E6%9C%8822%E6%97%A5%20%283%29%281%29.MP3?OSSAccessKeyId=LTAI5t9pMQmrtoHAsxeQrXxV&Expires=1770019174&Signature=XjHozX9CoccJ1fBHoBSyVYtydcc%3D",
+      "oss_meta": {
+        "sha256": "be5489777cf79c2ebf4d183b5d4d2928d6c3fafd9b0f8bc2bc7c3f1a96369ff9",
+        "object_name": "auto_uploads/by_hash/be5489777cf79c2ebf4d183b5d4d2928d6c3fafd9b0f8bc2bc7c3f1a96369ff9_1月22日 (3)(1).MP3",
+        "action": "reuse",
+        "local_file_path": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/JPM口播视频/葡萄架/三/1月22日 (3)(1).MP3"
+      },
+      "clone_request_id": "bd572338-b5b1-46b1-9111-f96594288f2f",
+      "created_at": "20260202_145950"
+    },
+    "cosyvoice-v3-flash-heshen01-1cc09ef938294017a82e2a5054da3bde": {
+      "voice_id": "cosyvoice-v3-flash-heshen01-1cc09ef938294017a82e2a5054da3bde",
+      "model": "cosyvoice-v3-flash",
+      "clone_prefix": "heshen01",
+      "clone_voice_name": "heshen01",
+      "ref_mp3": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/心理学/伴侣选择20260128/伴侣选择/伴侣选择.MP3",
+      "oss_url": "https://my-files-csy.oss-cn-hangzhou.aliyuncs.com/auto_uploads%2Fby_hash%2F2760436ad47078d0242117c99381e1465b960bea04342e048c580152c3878ccb_%E4%BC%B4%E4%BE%A3%E9%80%89%E6%8B%A9.MP3?OSSAccessKeyId=LTAI5t9pMQmrtoHAsxeQrXxV&Expires=1770113669&Signature=ZfFMc%2B%2FZRC4%2B%2B28JYwuwxO%2B9JOo%3D",
+      "oss_meta": {
+        "sha256": "2760436ad47078d0242117c99381e1465b960bea04342e048c580152c3878ccb",
+        "object_name": "auto_uploads/by_hash/2760436ad47078d0242117c99381e1465b960bea04342e048c580152c3878ccb_伴侣选择.MP3",
+        "action": "reuse",
+        "local_file_path": "/Users/test/Library/Mobile Documents/com~apple~CloudDocs/BEAST_BEING/my_mutimedia/my_scripts/心理学/伴侣选择20260128/伴侣选择/伴侣选择.MP3"
+      },
+      "clone_request_id": "9651f6de-37f9-4791-a7a4-b4734dfb5301",
+      "created_at": "20260203_171445"
+    }
+  }
+}

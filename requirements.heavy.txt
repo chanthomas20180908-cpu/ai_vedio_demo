@@ -1,0 +1,38 @@
+# Heavy / optional dependencies
+# Install only when you need these features.
+
+# UI
+# gradio>=4.0.0
+
+# Browser automation
+# playwright>=1.40.0
+# selenium>=4.15.0
+
+# Data science
+# pandas>=2.0.0
+# numpy>=1.24.0
+
+# Media processing
+# opencv-python>=4.8.0
+# moviepy>=1.0.3
+# imageio>=2.31.0
+# imageio-ffmpeg>=0.4.9
+
+# Documents
+# PyPDF2>=3.0.0
+# pdfplumber>=0.10.0
+# python-docx>=1.0.0
+# openpyxl>=3.1.0
+
+# CLI / UX
+# prompt-toolkit>=3.0.0
+# colorama>=0.4.6
+
+# Async (only if you need it outside base)
+# aiohttp>=3.9.0
+# aiohttp is a transitive dep for some packages; keep it here unless explicitly needed.
+
+# Audio
+# pydub>=0.25.1
+
+# Keep this file as a scratchpad: uncomment items as needed.
