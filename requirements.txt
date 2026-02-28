@@ -1,9 +1,8 @@
-pydub
+# 主入口 - 引用各环境依赖文件
+# 安装: pip install -r requirements.txt
 
-# AI/ML 核心库
-dashscope>=1.17.0
-openai>=1.0.0
-google-genai>=0.6.0
+-r requirements-base.txt
+-r requirements-heavy.txt
 
 # 环境变量管理
 python-dotenv>=1.0.0
@@ -11,49 +10,3 @@ python-dotenv>=1.0.0
 # 命令行交互
 prompt-toolkit>=3.0.0
 colorama>=0.4.6
-
-# HTTP 请求
-requests>=2.31.0
-
-# 网页抓取和解析
-beautifulsoup4>=4.12.0
-lxml>=4.9.0
-playwright>=1.40.0
-selenium>=4.15.0
-
-# 文档处理
-PyPDF2>=3.0.0
-pdfplumber>=0.10.0
-python-docx>=1.0.0
-openpyxl>=3.1.0
-
-# 多媒体处理
-Pillow>=10.0.0
-opencv-python>=4.8.0
-moviepy>=1.0.3
-imageio>=2.31.0
-imageio-ffmpeg>=0.4.9
-
-# 音频处理
-pydub>=0.25.1
-
-# 阿里云服务
-oss2>=2.18.0
-
-# 数据处理
-pandas>=2.0.0
-numpy>=1.24.0
-
-# 异步支持
-httpx>=0.25.0
-aiohttp>=3.9.0
-
-# 配置和日志
-pyyaml>=6.0
-
-# Web框架 (Gradio)
-gradio>=4.0.0
-
-# 其他工具
-pathlib2>=2.3.7
-charset-normalizer>=3.3.0
