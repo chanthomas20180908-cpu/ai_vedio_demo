@@ -1,0 +1,7 @@
+INPUT: /Users/test/Downloads/测试文本md/02_md/福尔摩斯探案全集_插图新注新译本_全七册_亚瑟_柯南_道尔_李家真_z_library_sk_1lib_sk_z_lib_sk.md
+OUT_DIR: /Users/test/code/Python/AI_vedio_demo/pythonProject/tmp_split_test/福尔摩斯_拆分结果
+CHAPTER_MODE: none
+STAGE: chapter
+CHAPTERS: 1
+
+001  line 1: 整篇

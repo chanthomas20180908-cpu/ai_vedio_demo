@@ -119,11 +119,19 @@ def compose_video_from_storyboard_002(
     durations: list[float] = []
 
     # 1) render each segment as mp4 (frame-limited)
+    # NOTE:
+    # - We use xfade (overlap) later, which would otherwise shorten the final video by (N-1)*xfade_s.
+    # - To keep the final duration aligned with storyboard/audio, we reserve xfade time by extending
+    #   every segment except the last by +xfade_s. The overlap then cancels out.
     for i, sc in enumerate(scenes, start=1):
         sid = int(sc.get("scene_id"))
         start_s = _safe_float(sc.get("start_s", 0.0))
         end_s = _safe_float(sc.get("end_s", 0.0))
+
+        is_last = i == len(scenes)
         duration = max(0.05, end_s - start_s)
+        if not is_last and xfade_s > 0:
+            duration += float(xfade_s)
 
         img = sc.get("image_override") or sc.get("image_path")
         if not img:

@@ -48,7 +48,9 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 TAG_RE = re.compile(r"<[^>]+>")
-CHAPTER_RE = re.compile(r"^\s*第([一二三四五六七八九十百千0-9]+)回\b(.*)$")
+CHAPTER_RE = re.compile(
+    r"^\s*(?:#+\s*)?第([一二三四五六七八九十百千0-9]+)回(?:\s+|$)(.*)$"
+)
 
 
 def strip_tags(s: str) -> str:
@@ -69,7 +71,8 @@ def is_chapter_heading_line(line: str) -> Optional[str]:
     if not CHAPTER_RE.match(plain):
         return None
 
-    # Keep the full heading text (trim excessive inner spaces)
+    # Keep heading text without markdown heading markers, trim excessive spaces.
+    plain = re.sub(r"^\s*#+\s*", "", plain)
     return re.sub(r"\s+", " ", plain)
 
 
