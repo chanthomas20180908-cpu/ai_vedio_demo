@@ -268,6 +268,91 @@ class GeminiClient:
             return None
 
 
+class GeminiCloubicClient:
+    """Gemini 第三方 REST 客户端（Cloubic 代理）。
+
+    兼容 curl 示例：
+    POST https://api.cloubic.com/v1beta/models/{model}:generateContent?key=API_KEY
+    body: {"contents":[{"parts":[{"text":"..."}]}]}
+
+    说明：只支持纯文本（把 OpenAI-style messages 压成一段文本）。
+    """
+
+    def __init__(self, api_key: str, base_url: str = "https://api.cloubic.com"):
+        if not api_key:
+            raise ValueError("Cloubic API key 不能为空")
+        self.api_key = api_key
+        self.base_url = base_url.rstrip("/")
+
+        try:
+            import requests  # type: ignore
+
+            self._requests = requests
+        except Exception as e:
+            logger.error(f"requests 未安装或导入失败，无法调用 Cloubic REST。错误: {e}", exc_info=True)
+            raise
+
+    def _extract_text(self, resp_json: dict) -> str:
+        # Gemini REST: candidates[0].content.parts[*].text
+        candidates = (resp_json or {}).get("candidates") or []
+        if not candidates:
+            return ""
+
+        content = (candidates[0] or {}).get("content") or {}
+        parts = content.get("parts") or []
+        texts: list[str] = []
+        for p in parts:
+            t = (p or {}).get("text")
+            if t:
+                texts.append(str(t))
+        return "".join(texts).strip()
+
+    def chat(self, _model: str, _messages: List[Dict[str, str]], timeout_seconds: int = 120, **kwargs) -> Optional[Dict[Any, Any]]:
+        logger.info(f"使用Gemini模型进行聊天(Cloubic REST): {_model}")
+
+        contents = _messages_to_plaintext(_messages)
+        if not contents.strip():
+            return {
+                "model": _model,
+                "choices": [{"message": {"content": ""}}],
+                "usage": {},
+            }
+
+        url = f"{self.base_url}/v1beta/models/{_model}:generateContent"
+        params = {"key": self.api_key}
+        payload = {
+            "contents": [
+                {
+                    "parts": [{"text": contents}],
+                }
+            ]
+        }
+
+        # 最简单实现：不做复杂重试策略，失败直接返回 None
+        try:
+            resp = self._requests.post(
+                url,
+                params=params,
+                headers={"Content-Type": "application/json"},
+                json=payload,
+                timeout=timeout_seconds,
+            )
+            if resp.status_code >= 400:
+                logger.error(f"Cloubic Gemini REST 请求失败: status={resp.status_code}, body={resp.text[:800]}")
+                return None
+
+            data = resp.json()
+            text = self._extract_text(data)
+            return {
+                "model": _model,
+                "choices": [{"message": {"content": text}}],
+                "usage": {},
+            }
+        except Exception as e:
+            logger.error(f"Cloubic Gemini REST 请求异常: {e}", exc_info=True)
+            return None
+
+
 class QwenClient(ChatModelClient):
     """Qwen模型客户端"""
 
@@ -338,7 +423,7 @@ def chat_with_model(api_key: str, model_type: str, model: str, messages: List[Di
 
     Args:
         api_key (str): API密钥
-        model_type (str): 模型类型 ('qwen', 'deepseek', 'deepseek_direct', 'openai')
+        model_type (str): 模型类型 ('qwen', 'deepseek', 'openai', 'gemini', 'gemini_cloubic')
         model (str): 模型名称
         messages (List[Dict[str, str]]): 消息列表
         **kwargs: 模型特定参数
@@ -371,6 +456,9 @@ def chat_with_model(api_key: str, model_type: str, model: str, messages: List[Di
             except Exception:
                 # close 失败不影响主流程
                 pass
+    elif model_type == "gemini_cloubic":
+        client = GeminiCloubicClient(api_key)
+        result = client.chat(model, messages, **kwargs)
     else:
         logger.error(f"不支持的模型类型: {model_type}")
         return None

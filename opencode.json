@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-antigravity-auth@latest"],
+  "default_agent": "video-create",
+  "provider": {
+    "google": {
+      "options": {
+        "baseURL": "https://api.whatai.cc/v1"
+      }
+    },
+    "anthropic": {
+      "options": {
+        "baseURL": "https://api.whatai.cc/v1"
+      }
+    },
+    "openai": {
+      "options": {
+        "baseURL": "https://api.whatai.cc/v1"
+      }
+    }
+  }
+}
