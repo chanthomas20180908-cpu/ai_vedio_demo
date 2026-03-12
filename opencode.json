@@ -3,19 +3,31 @@
   "plugin": ["opencode-antigravity-auth@latest"],
   "default_agent": "video-create",
   "provider": {
-    "google": {
+    "google":  {
       "options": {
-        "baseURL": "https://api.whatai.cc/v1"
+        "baseURL": "https://api.cloubic.com/v1"
       }
     },
     "anthropic": {
       "options": {
-        "baseURL": "https://api.whatai.cc/v1"
+        "baseURL": "https://api.cloubic.com/v1"
       }
     },
     "openai": {
       "options": {
-        "baseURL": "https://api.whatai.cc/v1"
+        "baseURL": "https://api.cloubic.com/v1"
+      }
+    }
+  },
+  "agent": {
+    "code-agent": {
+      "description": "code-agent",
+      "mode": "primary",
+      "prompt": "{file:/Users/test/code/Python/AI_vedio_demo/pythonProject/code-agent-prompt.md}",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true
       }
     }
   }
