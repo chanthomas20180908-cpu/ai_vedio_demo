@@ -478,11 +478,103 @@ def run_generation(
 
         block_ms = int(len(cb.pcm) / (sample_rate * channels * sampwidth) * 1000)
 
-        # flatten entries (sentence index -> list of segments) + fallback entries
+        # Assemble entries.
+        # Some backends/models may return word timestamps relative to each sentence (reset to 0).
+        # If we detect that, we rebuild a monotonic global timeline by concatenating sentences
+        # and scaling to match block_ms.
         entries: list[tuple[int, int, str]] = []
-        for segs in cb._entries_by_index.values():
-            entries.extend(segs)
-        entries.extend(cb.entries)
+
+        def _detect_sentence_relative() -> bool:
+            if not cb._entries_by_index:
+                return False
+            mins: list[int] = []
+            max_end = 0
+            for segs in cb._entries_by_index.values():
+                if not segs:
+                    continue
+                mb = min(int(b) for b, _, _ in segs)
+                me = max(int(e) for _, e, _ in segs)
+                mins.append(mb)
+                max_end = max(max_end, me)
+            if len(mins) < 2:
+                return False
+            zeros = sum(1 for x in mins if x == 0)
+            # heuristics: most sentences start at 0 AND max_end is far smaller than block length
+            return zeros >= max(2, int(len(mins) * 0.6)) and max_end < int(block_ms * 0.5)
+
+        if _detect_sentence_relative():
+            # sentence-relative mode
+            order = cb._sentence_order or sorted(cb._entries_by_index.keys())
+            # Ensure stable unique order
+            seen = set()
+            order2: list[int] = []
+            for idx in order:
+                if idx in seen:
+                    continue
+                seen.add(idx)
+                order2.append(idx)
+
+            def _est_span(text: str) -> int:
+                t = (text or "").strip()
+                if not t:
+                    return 800
+                # proportional weight; actual scale will be fitted to block_ms
+                return max(800, _count_cosyvoice_chars(t) * 60)
+
+            items: list[tuple[int, list[tuple[int, int, str]] | None, int, int, str]] = []
+            # (idx, segs|None, min_begin, span_raw, fallback_text)
+            for idx in order2:
+                segs = cb._entries_by_index.get(idx)
+                if segs:
+                    mb = min(int(b) for b, _, _ in segs)
+                    me = max(int(e) for _, e, _ in segs)
+                    span = max(1, me - mb)
+                    items.append((idx, segs, mb, span, ""))
+                else:
+                    txt = cb._sentence_text.get(idx, "")
+                    items.append((idx, None, 0, _est_span(txt), txt))
+
+            total_raw = sum(span for _, _, _, span, _ in items)
+            if total_raw <= 0:
+                total_raw = 1
+            scale = float(block_ms) / float(total_raw)
+
+            cur_off = 0
+            for _, segs, mb, span_raw, fb_text in items:
+                seg_len = int(round(span_raw * scale))
+                if seg_len <= 0:
+                    seg_len = 1
+
+                if segs:
+                    for b, e, t in segs:
+                        b2 = cur_off + int(round((int(b) - int(mb)) * scale))
+                        e2 = cur_off + int(round((int(e) - int(mb)) * scale))
+                        entries.append((b2, e2, t))
+                else:
+                    if fb_text.strip():
+                        entries.append((cur_off, cur_off + seg_len, fb_text.strip()))
+
+                cur_off += seg_len
+
+            # also include no-index fallback entries (best-effort): place them at the end of the block
+            for b, e, t in cb.entries:
+                # clamp into [0, block_ms]
+                b2 = max(0, min(int(block_ms - 1), int(b)))
+                e2 = max(b2 + 1, min(int(block_ms), int(e)))
+                entries.append((b2, e2, t))
+
+            # Ensure last entry does not exceed block_ms too much (rounding)
+            if entries:
+                # shift any overflow by trimming the last cue
+                entries.sort(key=lambda x: (x[0], x[1]))
+                lb, le, lt = entries[-1]
+                if le > block_ms:
+                    entries[-1] = (lb, max(lb + 1, int(block_ms)), lt)
+        else:
+            # global-timestamp mode (old behavior)
+            for segs in cb._entries_by_index.values():
+                entries.extend(segs)
+            entries.extend(cb.entries)
 
         for b, e, t in entries:
             entries_all.append((int(b) + offset_ms, int(e) + offset_ms, t))
@@ -525,19 +617,45 @@ def _normalize_entries(entries: list[tuple[int, int, str]]) -> list[tuple[int, i
     entries.sort(key=lambda x: (x[0], x[1]))
 
     out: list[tuple[int, int, str]] = []
-    prev_end = 0
     for b, e, t in entries:
-        b2 = max(int(b), int(prev_end))
-        e2 = max(int(e), b2 + 1)
+        b = int(b)
+        e = int(e)
+        if e <= b:
+            e = b + 1
+
+        if not out:
+            out.append((b, e, t))
+            continue
+
+        pb, pe, pt = out[-1]
+
+        # 若发生重叠：优先“回缩上一条的 end”来消除重叠，避免把当前 begin 往后推导致累计变慢。
+        if b < pe:
+            # 能正常回缩
+            if b > pb:
+                new_pe = min(pe, b)
+                if new_pe <= pb:
+                    new_pe = pb + 1
+                out[-1] = (pb, new_pe, pt)
+                pb, pe, pt = out[-1]
+            else:
+                # 极端乱序：当前 begin 早于上一条 begin，无法回缩上一条
+                # 这里保守处理：把当前 begin 推到上一条 end（这类情况应很少，不会形成大规模累计）
+                b = pe
+
+        # 经过上面的处理后，确保单调不重叠
+        if b < out[-1][1]:
+            b = out[-1][1]
+        if e <= b:
+            e = b + 1
 
         # 去重：连续相同文本，合并到上一条
         if out and out[-1][2] == t:
-            out[-1] = (out[-1][0], max(out[-1][1], e2), t)
-            prev_end = out[-1][1]
+            out[-1] = (out[-1][0], max(out[-1][1], e), t)
             continue
 
-        out.append((b2, e2, t))
-        prev_end = e2
+        out.append((b, e, t))
+
     return out
 
 
@@ -567,6 +685,9 @@ class TimestampCallback(ResultCallback):
         # collect sentence entries by sentence index (stable, allows overwrite)
         # 一个 sentence 可能会被切成多条字幕，因此 value 是 list
         self._entries_by_index: dict[int, list[tuple[int, int, str]]] = {}
+        # sentence order + original_text (best-effort)
+        self._sentence_order: list[int] = []
+        self._sentence_text: dict[int, str] = {}
         # fallback entries if index is missing
         self.entries: list[tuple[int, int, str]] = []
 
@@ -600,13 +721,25 @@ class TimestampCallback(ResultCallback):
         except Exception:
             return
 
-        sentence = (
-            obj.get("payload", {})
-            .get("output", {})
-            .get("sentence")
-        )
+        output = obj.get("payload", {}).get("output", {})
+        sentence = output.get("sentence")
         if not sentence:
             return
+
+        # Track sentence order/text even when no words present.
+        idx = sentence.get("index")
+        if isinstance(idx, int):
+            if not self._sentence_order or self._sentence_order[-1] != idx:
+                # sentence index is monotonic in practice; keep first-seen order
+                if idx not in self._sentence_order:
+                    self._sentence_order.append(idx)
+
+            ot = output.get("original_text")
+            if isinstance(ot, str) and ot.strip():
+                # keep the longest non-empty original_text
+                prev = self._sentence_text.get(idx, "")
+                if len(ot.strip()) >= len(prev.strip()):
+                    self._sentence_text[idx] = ot.strip()
 
         words = sentence.get("words") or []
         if not words:
@@ -617,10 +750,25 @@ class TimestampCallback(ResultCallback):
         if not seg_entries:
             return
 
-        idx = sentence.get("index")
-        if isinstance(idx, int):
-            # 允许 overwrite：同一个 sentence index 后续事件可能更完整
-            self._entries_by_index[idx] = seg_entries
+        def _score(segs: list[tuple[int, int, str]]) -> tuple[int, int, int]:
+            # Prefer entries that cover larger time span and contain more text.
+            # Note: begin/end are ms within current block.
+            if not segs:
+                return (0, 0, 0)
+            b0 = int(segs[0][0])
+            e1 = int(segs[-1][1])
+            span = max(0, e1 - b0)
+            chars = sum(len(str(t)) for _, _, t in segs)
+            n = len(segs)
+            return (span, chars, n)
+
+        idx2 = sentence.get("index")
+        if isinstance(idx2, int):
+            # 同一个 sentence index 的 event 可能到达多次：有时后到的反而更不完整。
+            # 为避免“覆盖导致丢块”，这里保留 score 更高（更完整）的那份。
+            prev = self._entries_by_index.get(idx2)
+            if prev is None or _score(seg_entries) >= _score(prev):
+                self._entries_by_index[idx2] = seg_entries
         else:
             # 没有 index 的兜底
             self.entries.extend(seg_entries)
