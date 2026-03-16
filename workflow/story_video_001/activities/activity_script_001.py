@@ -905,6 +905,12 @@ def main(*, profile: dict[str, Any]) -> int:
                     "medium",
                     "--language",
                     "zh",
+                    "--gap_split_sec",
+                    "0.8",
+                    "--max_cue_sec",
+                    "4.0",
+                    "--max_chars",
+                    "50",
                 ],
                 cwd=PROJECT_ROOT,
             ),
@@ -926,6 +932,11 @@ def main(*, profile: dict[str, Any]) -> int:
                 "subtitle_mode": "forcealign_spoken",
                 "asr_model": "medium",
                 "script": SUBTITLE_FORCEALIGN_SCRIPT,
+                "params": {
+                    "gap_split_sec": 0.8,
+                    "max_cue_sec": 4.0,
+                    "max_chars": 50,
+                },
             },
         }
         logger.info(
