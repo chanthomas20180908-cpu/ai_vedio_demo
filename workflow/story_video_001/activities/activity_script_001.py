@@ -53,7 +53,9 @@ from workflow.story_video_001.tasks.task_compose_video_from_storyboard_002 impor
     compose_video_from_storyboard_002,
 )
 
-NANOBANANA_SCRIPT = str(PROJECT_ROOT / "debug" / "nanobanana" / "run_gemini_flash_generate.py")
+NANOBANANA_OFFICIAL_SCRIPT = str(PROJECT_ROOT / "debug" / "nanobanana" / "run_gemini_flash_generate.py")
+# Cloubic OpenAI-compat image backend (banana)
+CLOUBIC_BANANA_SCRIPT = str(PROJECT_ROOT / "debug" / "nanobanana" / "run_cloubic_banana_generate.py")
 TTS_SCRIPT = str(PROJECT_ROOT / "debug" / "story_audio" / "run_md_to_story_audio_with_clone.py")
 CLEAN_SRT_SCRIPT = str(PROJECT_ROOT / "tools" / "clean_srt_profanity_same_len.py")
 
@@ -672,6 +674,23 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="统一输出根目录（默认 data/Data_results/script_results）",
     )
 
+    # Provider: choose ONE for the whole workflow run.
+    # - official: current default (google-genai + GEMINI_API_KEY)
+    # - cloubic: cloubic proxy for text (gemini_cloubic) + banana for images (CLOUBIC_API_KEY)
+    ap.add_argument(
+        "--provider",
+        default="official",
+        choices=["official", "cloubic"],
+        help="模型接入提供方（一次运行只选一种）：official|cloubic",
+    )
+    ap.add_argument("--text_model", default="", help="文本模型名（覆盖默认；同一 run 内 spoken+prompts 共用）")
+    ap.add_argument("--image_model", default="", help="生图模型名（仅 cloubic/banana 使用；覆盖默认）")
+    ap.add_argument(
+        "--cloubic_openai_base_url",
+        default="",
+        help="Cloubic OpenAI 兼容 base_url（默认 https://api.cloubic.com/v1）",
+    )
+
     # 快速测试/复用
     ap.add_argument("--max_scenes", type=int, default=0, help="仅处理前 N 个 scene（0 不限制）")
     ap.add_argument("--skip_images", action="store_true")
@@ -794,6 +813,26 @@ def main(*, profile: dict[str, Any]) -> int:
     aspect_ratio = args.aspect_ratio.strip() or str(profile["aspect_ratio"])
     ref_image = args.ref_image.strip() or str(profile["ref_image"])
 
+    provider = str(args.provider).strip().lower()
+    if provider not in {"official", "cloubic"}:
+        raise ValueError(f"provider 不支持：{provider}")
+
+    # One provider for the whole run
+    if provider == "cloubic":
+        model_type = "gemini_cloubic"
+        default_text_model = "gemini-3-flash-preview"
+        default_image_model = "gemini-2.5-flash-image"
+        image_backend_script = CLOUBIC_BANANA_SCRIPT
+    else:
+        model_type = "gemini"
+        default_text_model = "gemini-3-flash-preview"
+        default_image_model = ""  # not used by the official nanobanana script
+        image_backend_script = NANOBANANA_OFFICIAL_SCRIPT
+
+    text_model = args.text_model.strip() or default_text_model
+    image_model = args.image_model.strip() or default_image_model
+    cloubic_openai_base_url = args.cloubic_openai_base_url.strip() or "https://api.cloubic.com/v1"
+
     spoken_system_1 = args.spoken_system_1.strip() or str(profile["spoken_system_1"])
     spoken_user_1_template = args.spoken_user_1_template.strip() or str(profile["spoken_user_1_template"])
 
@@ -824,7 +863,8 @@ def main(*, profile: dict[str, Any]) -> int:
         f"aspect_ratio={aspect_ratio} ref_image={ref_image} max_scenes={args.max_scenes} "
         f"skip_images={args.skip_images} skip_video={args.skip_video} "
         f"tts_model={tts_model} use_cloned_voice={use_cloned_voice} "
-        f"video={video_width}x{video_height}@{video_fps}"
+        f"video={video_width}x{video_height}@{video_fps} "
+        f"provider={provider} model_type={model_type} text_model={text_model}"
     )
 
     try:
@@ -839,6 +879,8 @@ def main(*, profile: dict[str, Any]) -> int:
                 raw_text,
                 system_prompt_1=spoken_system_1,
                 user_prompt_1_template=spoken_user_1_template,
+                model_type=str(model_type),
+                model=str(text_model),
             ),
             what="task_spoken_001",
             logger=logger,
@@ -1027,6 +1069,8 @@ def main(*, profile: dict[str, Any]) -> int:
                 user_prompt_template=str(img_prompt_user_template),
                 base_prompt=img_prompt_base,
                 batch_size=int(img_prompt_batch_size),
+                model_type=str(model_type),
+                model=str(text_model),
             ),
             what="image_prompts_sync_002_for_scenes",
             logger=logger,
@@ -1071,15 +1115,29 @@ def main(*, profile: dict[str, Any]) -> int:
                         logger.warning(f"prompt save failed scene[{sid}]: {type(e).__name__}: {e}")
 
                     stdout = _run(
-                        [
-                            sys.executable,
-                            NANOBANANA_SCRIPT,
-                            "--aspect-ratio",
-                            str(aspect_ratio),
-                            "--image",
-                            str(ref_image_path),
-                            prompt_str,
-                        ],
+                        (
+                            [
+                                sys.executable,
+                                image_backend_script,
+                                "--image",
+                                str(ref_image_path),
+                                "--model",
+                                str(image_model),
+                                "--base_url",
+                                str(cloubic_openai_base_url),
+                                prompt_str,
+                            ]
+                            if provider == "cloubic"
+                            else [
+                                sys.executable,
+                                image_backend_script,
+                                "--aspect-ratio",
+                                str(aspect_ratio),
+                                "--image",
+                                str(ref_image_path),
+                                prompt_str,
+                            ]
+                        ),
                         cwd=paths.root,
                     )
                     saved_paths = _parse_nanobanana_saved_paths(stdout)

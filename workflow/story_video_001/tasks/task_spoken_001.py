@@ -44,11 +44,24 @@ def task_spoken_001(
         raise RuntimeError("spoken 提示词为空：system_prompt_1/user_prompt_1_template 不能为空")
 
     # load api key
+    # - gemini: official google-genai key
+    # - gemini_cloubic: cloubic proxy key
     if api_key is None:
         load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../../../env/default.env"))
-        api_key = os.getenv("GEMINI_API_KEY")
+        if str(model_type).strip() == "gemini_cloubic":
+            api_key = os.getenv("CLOUBIC_API_KEY")
+            if not api_key:
+                raise RuntimeError(
+                    "未找到 CLOUBIC_API_KEY（请在 env/default.env 或环境变量中配置，或显式传 api_key）"
+                )
+        else:
+            api_key = os.getenv("GEMINI_API_KEY")
+            if not api_key:
+                raise RuntimeError(
+                    "未找到 GEMINI_API_KEY（请在 env/default.env 或环境变量中配置，或显式传 api_key）"
+                )
     if not api_key:
-        raise RuntimeError("未找到 GEMINI_API_KEY（请在 env/default.env 或环境变量中配置，或显式传 api_key）")
+        raise RuntimeError("api_key 为空（请检查环境变量或显式传 api_key）")
 
     # -------- Call #1 --------
     user_prompt_1 = _format_template(user_prompt_1_template, {"raw_text": raw_text})

@@ -16,7 +16,10 @@ Pos: 工作流 - 生成图提示词（taskgroup 002，不修改 001）
 from __future__ import annotations
 
 import json
+import os
 from typing import Any, Optional, TypeVar
+
+from dotenv import load_dotenv
 
 from component.chat.chat import chat_with_model
 from data import test_prompt_script
@@ -98,6 +101,24 @@ def image_prompts_sync_002(
         raise ValueError("system_prompt 不能为空")
     if not user_prompt_template.strip():
         raise ValueError("user_prompt_template 不能为空")
+
+    # api_key: follow model_type convention
+    # - gemini: GEMINI_API_KEY
+    # - gemini_cloubic: CLOUBIC_API_KEY
+    if api_key is None:
+        # keep project convention: try env/default.env first
+        try:
+            load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../../../env/default.env"))
+        except Exception:
+            pass
+        if str(model_type).strip() == "gemini_cloubic":
+            api_key = os.getenv("CLOUBIC_API_KEY")
+        else:
+            api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        key_name = "CLOUBIC_API_KEY" if str(model_type).strip() == "gemini_cloubic" else "GEMINI_API_KEY"
+        raise RuntimeError(f"缺少 API Key：请设置环境变量 {key_name} 或显式传 api_key")
 
     base = _load_base_prompt(base_prompt=base_prompt)
 
